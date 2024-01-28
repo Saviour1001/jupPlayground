@@ -21,7 +21,6 @@ let quoteResponse;
 try {
   quoteResponse = await (await fetch(val)).json();
   console.log("found the quote");
-  console.log("Quote" + JSON.stringify(quoteResponse));
 } catch (e) {
   console.log("Error is " + e);
 }
@@ -53,16 +52,23 @@ const swapTransactionBuf = Buffer.from(swapTransaction, "base64");
 
 var transaction = VersionedTransaction.deserialize(swapTransactionBuf);
 
-console.log("////////////////");
+console.log("//////signing the txn//////////");
 // console.log("Swap Transaction" + JSON.stringify(transaction));
 // sign the transaction
 transaction.sign([swapUserKeypair]);
 
 const rawTransaction = transaction.serialize();
 
-console.log("Raw Transaction" + rawTransaction);
-const txid = await connection.sendRawTransaction(rawTransaction, {
-  skipPreflight: true,
-});
-await connection.confirmTransaction(txid);
-console.log(`https://solscan.io/tx/${txid}`);
+console.log("//////sending the txn//////////");
+
+try {
+  const txid = await connection.sendRawTransaction(rawTransaction, {
+    skipPreflight: true,
+  });
+  console.log("//////confirming the txn//////////");
+  await connection.confirmTransaction(txid);
+
+  console.log(`https://solana.fm/tx/${txid}`);
+} catch (e) {
+  console.log("Error is " + e);
+}

@@ -10,4 +10,4 @@ const tokens = {
 export const inputToken = tokens.SOL;
 export const outputToken = tokens.USDC;
 export const slippage = 50; // 0.5%
-export const amount = 1000000; // in LAMPORTS
+export const amount = 100000; // in LAMPORTS

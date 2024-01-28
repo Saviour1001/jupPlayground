@@ -5,7 +5,7 @@ import keys from "./output";
 console.log(`Running with ${totalWorkers} worker(s).`); */
 
 for (let i = 0; i < 1; i++) {
-  const worker = new Worker("./test.js", { workerData: keys[i] });
+  const worker = new Worker("./worker.js", { workerData: keys[i] });
 
   worker.on("message", async (result) => {
     console.log(result);
