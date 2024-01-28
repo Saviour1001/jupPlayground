@@ -7,18 +7,15 @@ import {
 } from "@solana/web3.js";
 
 import workerDataReceived from "worker_threads";
+import { RPC_URL, amount, inputToken, outputToken, slippage } from "./consts";
 // console.log("Secret Key" + JSON.stringify(workerDataReceived.workerData));
 const swapUserKeypair = Keypair.fromSecretKey(
   new Uint8Array(workerDataReceived.workerData)
 );
 console.log("Swap User : " + swapUserKeypair.publicKey.toBase58());
 
-const connection = new Connection(
-  "https://mainnet.helius-rpc.com/?api-key=13eff9dc-b9a2-4b0f-add6-c7a1ece4a7aa",
-  "confirmed"
-);
-let val =
-  "https://quote-api.jup.ag/v6/quote?inputMint=So11111111111111111111111111111111111111112&outputMint=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v&amount=1000000&slippageBps=50";
+const connection = new Connection(RPC_URL, "confirmed");
+let val = `https://quote-api.jup.ag/v6/quote?inputMint=${inputToken}&outputMint=${outputToken}&amount=${amount}&slippageBps=${slippage}`;
 
 let quoteResponse;
 try {
