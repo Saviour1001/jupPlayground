@@ -1,2 +1,5 @@
 yarn.lock
 node_modules
+output.json
+public.json
+package-lock.json
