@@ -7,68 +7,45 @@ import {
 } from "@solana/web3.js";
 
 import workerDataReceived from "worker_threads";
-import { RPC_URL, amount, inputToken, outputToken, slippage } from "./consts";
+
+import {
+  RPC_URLS,
+  amount,
+  inputToken,
+  outputToken,
+  slippage,
+} from "./consts.js";
 // console.log("Secret Key" + JSON.stringify(workerDataReceived.workerData));
-const swapUserKeypair = Keypair.fromSecretKey(
-  new Uint8Array(workerDataReceived.workerData)
+
+let transactions = [];
+// console.log("Data Received :" + JSON.stringify(workerDataReceived.workerData.t1))
+transactions.push(
+  workerDataReceived.workerData.t1,
+  workerDataReceived.workerData.t2,
+  workerDataReceived.workerData.t3
 );
-console.log("Swap User : " + swapUserKeypair.publicKey.toBase58());
 
-const connection = new Connection(RPC_URL, "confirmed");
-let val = `https://quote-api.jup.ag/v6/quote?inputMint=${inputToken}&outputMint=${outputToken}&amount=${amount}&slippageBps=${slippage}`;
+for (let i = 0; i < 3; i++) {
+  console.log("Executing");
 
-let quoteResponse;
-try {
-  quoteResponse = await (await fetch(val)).json();
-  console.log("found the quote");
-} catch (e) {
-  console.log("Error is " + e);
-}
+  const connection1 = new Connection(RPC_URLS[0], "confirmed");
+  const connection2 = new Connection(RPC_URLS[1], "confirmed");
+  const connection3 = new Connection(RPC_URLS[2], "confirmed");
 
-// get serialized transactions for the swap
-const { swapTransaction } = await (
-  await fetch("https://quote-api.jup.ag/v6/swap", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      // quoteResponse from /quote api
-      quoteResponse,
-      // user public key to be used for the swap
-      userPublicKey: swapUserKeypair.publicKey.toString(),
-      // auto wrap and unwrap SOL. default is true
-      wrapAndUnwrapSol: true,
-      // feeAccount is optional. Use if you want to charge a fee.  feeBps must have been passed in /quote API.
-      // feeAccount: "fee_account_public_key"
-    }),
-  })
-).json();
-
-// console.log("Swap Transaction" + swapTransaction);
-
-// deserialize the transaction
-const swapTransactionBuf = Buffer.from(swapTransaction, "base64");
-
-var transaction = VersionedTransaction.deserialize(swapTransactionBuf);
-
-console.log("//////signing the txn//////////");
-// console.log("Swap Transaction" + JSON.stringify(transaction));
-// sign the transaction
-transaction.sign([swapUserKeypair]);
-
-const rawTransaction = transaction.serialize();
-
-console.log("//////sending the txn//////////");
-
-try {
-  const txid = await connection.sendRawTransaction(rawTransaction, {
+  console.log("Sending via RPC url", RPC_URLS[0]);
+  const txid1 = await connection1.sendRawTransaction(transactions[i], {
     skipPreflight: true,
   });
-  console.log("//////confirming the txn//////////");
-  await connection.confirmTransaction(txid);
 
-  console.log(`https://solana.fm/tx/${txid}`);
-} catch (e) {
-  console.log("Error is " + e);
+  console.log("Sending via RPC url", RPC_URLS[1]);
+  const txid2 = await connection2.sendRawTransaction(transactions[i], {
+    skipPreflight: true,
+  });
+
+  console.log("Sending via RPC url", RPC_URLS[2]);
+  const txid3 = await connection3.sendRawTransaction(transactions[i], {
+    skipPreflight: true,
+  });
+
+  console.log("txid is " + txid1);
 }
